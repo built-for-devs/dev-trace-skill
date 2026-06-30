@@ -104,10 +104,10 @@ Every key is optional. Add only the ones you want, then drop them into `.env`.
 
 | Provider | Where to get a key | Unlocks | Tier |
 |---|---|---|---|
-| **GitHub** | [github.com/settings/tokens](https://github.com/settings/tokens) | Higher GitHub rate limits | Free |
-| **Tabstack** | [tabstack.ai](https://tabstack.ai) | Company enrichment + cited `/research` bio | Free account, generous |
-| **Hunter** | [hunter.io/api-keys](https://hunter.io/api-keys) | Email verification + person enrichment | Metered |
-| **SixtyFour** | [sixtyfour.ai](https://sixtyfour.ai) | Deepest person + LinkedIn (`--deep`) | Premium |
+| **GitHub** | [github.com/settings/tokens](https://github.com/settings/tokens?utm_source=dev-trace-skill&utm_medium=github&utm_campaign=skill) | Higher GitHub rate limits | Free |
+| **Tabstack** | [tabstack.ai](https://tabstack.ai/?utm_source=dev-trace-skill&utm_medium=github&utm_campaign=skill) | Company enrichment + cited `/research` bio | Free account, generous |
+| **Hunter** | [hunter.io/api-keys](https://hunter.io/api-keys?utm_source=dev-trace-skill&utm_medium=github&utm_campaign=skill) | Email verification + person enrichment | Metered |
+| **SixtyFour** | [sixtyfour.ai](https://sixtyfour.ai/?utm_source=dev-trace-skill&utm_medium=github&utm_campaign=skill) | Deepest person + LinkedIn (`--deep`) | Premium |
 
 ```bash
 cp .env.example .env
