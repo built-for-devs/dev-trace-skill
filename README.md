@@ -33,20 +33,41 @@ That already validates the address and pulls Gravatar, domain, and GitHub identi
 node scripts/dev-trace.mjs jordan@acme.dev --pretty
 ```
 
-```json
+```jsonc
 {
-  "meta": { "email": "jordan@acme.dev", "depths_run": [0, 1, 2, 3, 4], "match_status": "verified" },
+  "meta": { "email": "jordan@acme.dev", "depths_run": [0,1,2,3,4,5], "match_status": "verified", "sixtyfour_confidence": 9 },
   "profile": {
-    "name":            { "value": "Jordan Lee",                        "confidence": 0.90, "sources": ["hunter"] },
-    "role":            { "value": "Head of Platform",                  "confidence": 0.90, "sources": ["hunter"] },
-    "company_name":    { "value": "Acme",                              "confidence": 0.90, "sources": ["tabstack", "hunter"] },
-    "social_linkedin": { "value": "https://linkedin.com/in/jordanlee", "confidence": 0.90, "sources": ["hunter"] },
-    "bio":             { "value": "Jordan Lee leads platform engineering at Acme, where ... [1][2]", "confidence": 0.85, "sources": ["tabstack-research"] }
+    "name":             { "value": "Jordan Lee",                        "confidence": 0.90, "sources": ["hunter","sixtyfour"] },
+    "role":             { "value": "Head of Platform",                  "confidence": 0.90, "sources": ["hunter"] },
+    "seniority":        { "value": "executive",                         "confidence": 0.85, "sources": ["hunter"] },
+    "location":         { "value": "Austin, Texas, United States",      "confidence": 0.90, "sources": ["sixtyfour"] },
+    "avatar":           { "value": "https://gravatar.com/avatar/...",   "confidence": 0.80, "sources": ["gravatar"] },
+    "bio":              { "value": "Jordan Lee leads platform engineering at Acme ... [1][2]", "confidence": 0.85, "sources": ["tabstack-research"] },
+    "company_name":     { "value": "Acme",                              "confidence": 0.90, "sources": ["tabstack","hunter"] },
+    "company_industry": { "value": "Developer tools",                   "confidence": 0.85, "sources": ["tabstack"] },
+    "company_domain":   { "value": "acme.dev",                          "confidence": 0.90, "sources": ["domain"] },
+    "website":          { "value": "https://acme.dev",                  "confidence": 0.81, "sources": ["sixtyfour"] },
+    "phone":            { "value": "+1 512 555 0143",                   "confidence": 0.90, "sources": ["sixtyfour"] },
+    "social_linkedin":  { "value": "https://linkedin.com/in/jordanlee", "confidence": 0.90, "sources": ["hunter"] },
+    "social_github":    { "value": "https://github.com/jordanlee",      "confidence": 0.90, "sources": ["sixtyfour"] }
+    // ...and more, depending on which layers ran
   }
 }
 ```
 
 Every field carries its own `confidence`, the `sources` that produced it, and a `conflict` marker when providers disagree—so you always know how much to trust each value.
+
+## Fields it can populate
+
+What you get back depends on which layers run, but the waterfall can fill a wide profile:
+
+- **Identity** — `name`, `role`, `seniority`, `location`, `avatar`, `bio`
+- **Company** — `company_name`, `company_description`, `company_industry`, `company_size`, `company_location`, `company_domain`
+- **Social** — `social_linkedin`, `social_twitter`, `social_github`, any Gravatar-linked accounts, plus `company_social_*`
+- **Contact** — `email_found`, `phone`, `website`
+- **GitHub** — `github_login`, `github_public_repos`, `github_followers`
+
+Fields only appear when a source actually returns them (public data only), and each is wrapped with `value` / `confidence` / `sources` / `conflict`.
 
 ## What it costs
 

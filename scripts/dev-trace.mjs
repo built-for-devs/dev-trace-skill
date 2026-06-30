@@ -259,6 +259,7 @@ async function depth2() {
       const u = (await http(`https://api.github.com/users/${login}`, { headers })).json;
       if (u) {
         addField('github_login', u.login, 0.85, 'github');
+        if (u.login) addField('social_github', `https://github.com/${u.login}`, 0.9, 'github');
         addField('name', u.name, 0.8, 'github');
         addField('company_name', (u.company || '').replace(/^@/, ''), 0.7, 'github');
         addField('location', u.location, 0.75, 'github');
@@ -354,7 +355,10 @@ async function depth4() {
       addField('location', p.location, 0.8, 'hunter');
       addField('bio', p.bio, 0.7, 'hunter');
       addField('website', p.site, 0.6, 'hunter');
-      if (p.github?.handle) addField('github_login', p.github.handle, 0.8, 'hunter');
+      if (p.github?.handle) {
+        addField('github_login', p.github.handle, 0.8, 'hunter');
+        addField('social_github', `https://github.com/${p.github.handle}`, 0.85, 'hunter');
+      }
       if (p.linkedin?.handle)
         addField('social_linkedin', `https://linkedin.com/in/${p.linkedin.handle}`, 0.9, 'hunter');
       if (p.twitter?.handle)
