@@ -1,29 +1,66 @@
-# dev-trace
+# Dev Trace
 
-**Turn an email into an enriched, cited public profile—with one command.**
-A standalone [agent skill](https://docs.claude.com/en/docs/claude-code/skills) from [Built for Devs](https://builtfor.dev).
+**Turn an email into an enriched, cited public profile—in one command.**
 
-`dev-trace` runs a fixed **waterfall** of public sources over an email address—validating it, surfacing public profiles, checking deliverability, pulling GitHub identity, enriching company and person data, and synthesizing a cited bio. Each layer is gated by whether its API key is present, so it works on day one with zero keys and gets richer as you add them. Public data only: below its confidence threshold it returns *candidates* instead of inventing an answer.
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
+[![Node](https://img.shields.io/badge/node-%E2%89%A518-green.svg)](https://nodejs.org)
+[![Built for Devs](https://img.shields.io/badge/Built%20for%20Devs-agent%20skill-ff5c00.svg)](https://builtfor.dev)
 
-Zero dependencies (Node 18+). Bring your own keys. Runs the same way every time.
+A standalone [agent skill](https://docs.claude.com/en/docs/claude-code/skills) from [Built for Devs](https://builtfor.dev). Give it an email; it runs a deterministic **waterfall** of public sources—validate, surface, verify, GitHub, company enrichment, person enrichment, and a cited bio—and returns one structured profile with a confidence score and sources on every field.
+
+- **Works on day one with zero keys**, and gets richer as you add them.
+- **Costs nothing by default.** Paid providers are opt-in, so you spend only when a lead is worth it.
+- **Public data only.** Below its confidence threshold it returns *candidates*, never invents.
+- **Zero dependencies** (Node 18+). Runs the same way every time.
 
 ---
 
-## What it costs (the important part)
+## Quickstart
 
-`dev-trace` is built so you get a genuinely useful profile **for free**, and every paid provider is **opt-in**—so you (or your company) spend only when a lead is worth it.
+```bash
+git clone https://github.com/built-for-devs/dev-trace-skill
+cd dev-trace-skill
 
-| Tier | Providers | What you get |
+# Free layers only, no keys, no cost:
+node scripts/dev-trace.mjs someone@example.com --pretty
+```
+
+That already validates the address and pulls Gravatar, domain, and GitHub identity. Add keys (below) to unlock company data, verification, person enrichment, and a cited bio.
+
+## Example
+
+```bash
+node scripts/dev-trace.mjs jordan@acme.dev --pretty
+```
+
+```json
+{
+  "meta": { "email": "jordan@acme.dev", "depths_run": [0, 1, 2, 3, 4], "match_status": "verified" },
+  "profile": {
+    "name":            { "value": "Jordan Lee",                        "confidence": 0.90, "sources": ["hunter"] },
+    "role":            { "value": "Head of Platform",                  "confidence": 0.90, "sources": ["hunter"] },
+    "company_name":    { "value": "Acme",                              "confidence": 0.90, "sources": ["tabstack", "hunter"] },
+    "social_linkedin": { "value": "https://linkedin.com/in/jordanlee", "confidence": 0.90, "sources": ["hunter"] },
+    "bio":             { "value": "Jordan Lee leads platform engineering at Acme, where ... [1][2]", "confidence": 0.85, "sources": ["tabstack-research"] }
+  }
+}
+```
+
+Every field carries its own `confidence`, the `sources` that produced it, and a `conflict` marker when providers disagree—so you always know how much to trust each value.
+
+## What it costs
+
+Dev Trace is built so you get a genuinely useful profile **for free**, and every paid provider is **opt-in**.
+
+| Tier | Provider | What you get |
 |---|---|---|
 | 🟢 **Free, no account** | built-in | Email validation (syntax/MX/disposable), Gravatar + domain surface, **GitHub** identity |
-| 🟢 **Free key, optional** | GitHub token | Higher GitHub rate limits and reliability (`GITHUB_TOKEN` is free to generate) |
-| 🟢 **Free account, goes far** | **Tabstack** | Company/web enrichment **and** a cited, multi-source `/research` bio. A free Tabstack account covers a lot before you ever pay. |
+| 🟢 **Free key, optional** | GitHub token | Higher GitHub rate limits (`GITHUB_TOKEN` is free to generate) |
+| 🟢 **Free account, goes far** | **Tabstack** | Company/web enrichment **and** a cited, multi-source `/research` bio |
 | 🟡 **Metered, free tier then paid** | **Hunter** | Email verification + person enrichment (LinkedIn, role, seniority) |
-| 🔴 **Premium, real $$$$** | **SixtyFour** | The deepest person + LinkedIn dive. **~$4.80 per pull** (≈20 credits at the `medium` tier, $0.24/credit)—on the $24/mo entry plan that's ~5 pulls/month. The break-glass layer. |
+| 🔴 **Premium, real $$$$** | **SixtyFour** | Deepest person + LinkedIn dive. **~$4.80/pull** (≈20 credits at `medium`, $0.24/credit), ~5/month on the entry plan. The break-glass layer, opt-in via `--deep`. |
 
-You can run the whole free path and never spend a cent. The metered and premium layers are there **if you want the depth and choose to make the spend.**
-
----
+Run the whole free path and never spend a cent. The metered and premium layers are there for when you want the depth and choose to make the spend.
 
 ## The waterfall
 
@@ -36,63 +73,51 @@ You can run the whole free path and never spend a cent. The metered and premium 
 | 3 | enriched | Tabstack web/company | `TABSTACK_API_KEY` | if key |
 | 4 | deep | Hunter person enrichment | `HUNTER_API_KEY` | if key |
 | 5 | deepest | SixtyFour people-intelligence | `SIXTYFOUR_API_KEY` | only with `--deep` |
-| + | bio | Tabstack `/research` (cited) | `TABSTACK_API_KEY` | when a name is resolved |
+| bio | synthesis | Tabstack `/research` (cited) | `TABSTACK_API_KEY` | when a name is resolved |
 
-Layers run in order and merge into one profile. Every field is wrapped with a `value`, a `confidence` score, the `sources` that contributed, and a `conflict` marker when sources disagree.
+Layers run in order and merge into one profile. A layer whose key is absent is skipped; a layer that errors is recorded in `meta` and never aborts the rest.
 
----
+## Get your keys
 
-## Install
+Every key is optional. Add only the ones you want, then drop them into `.env`.
 
-It's a folder. Drop it into your agent's skills directory:
+| Provider | Where to get a key | Unlocks | Tier |
+|---|---|---|---|
+| **GitHub** | [github.com/settings/tokens](https://github.com/settings/tokens) | Higher GitHub rate limits | Free |
+| **Tabstack** | [tabstack.ai](https://tabstack.ai) | Company enrichment + cited `/research` bio | Free account, generous |
+| **Hunter** | [hunter.io/api-keys](https://hunter.io/api-keys) | Email verification + person enrichment | Metered |
+| **SixtyFour** | [sixtyfour.ai](https://sixtyfour.ai) | Deepest person + LinkedIn (`--deep`) | Premium |
+
+```bash
+cp .env.example .env
+# add the keys you have; the engine reads .env from the skill root or scripts/
+```
+
+`.env` is gitignored—keys are never committed.
+
+## Install as a skill
+
+Dev Trace is a self-contained skill folder. To use it inside an agent, clone it into the directory that agent loads skills from:
 
 ```bash
 git clone https://github.com/built-for-devs/dev-trace-skill ~/.claude/skills/dev-trace
 ```
 
-(Any path your agent loads skills from works; for Claude Code that's `~/.claude/skills/` or a project's `.claude/skills/`.) Or just run the engine directly—see below.
-
-## Setup keys
-
-Every key is optional. Copy the example and add the ones you have:
-
-```bash
-cp .env.example .env
-# edit .env—the engine reads it from the skill root or scripts/
-```
-
-```
-GITHUB_TOKEN=        # free; raises GitHub rate limits
-TABSTACK_API_KEY=    # free account, generous credits
-HUNTER_API_KEY=      # metered credits
-SIXTYFOUR_API_KEY=   # premium; only used with --deep
-```
-
-`.env` is gitignored—keys are never committed.
+For Claude Code that's `~/.claude/skills/` (global) or a project's `.claude/skills/`. The agent reads `SKILL.md` and invokes the engine for you. Not using a skills-aware agent? Run the engine directly, as in [Quickstart](#quickstart).
 
 ## Usage
 
 ```bash
-# Free layers only—no keys, no cost
-node scripts/dev-trace.mjs someone@example.com --max-depth 2 --pretty
-
-# Full default run (uses whatever keys are present)
-node scripts/dev-trace.mjs someone@example.com --pretty
-
-# Save raw JSON
-node scripts/dev-trace.mjs someone@example.com --json out.json
-
-# Premium deep dive (SixtyFour)—expensive, opt-in
-node scripts/dev-trace.mjs someone@example.com --deep
+node scripts/dev-trace.mjs <email> [options]
 ```
 
 | Flag | Effect |
 |---|---|
 | `--pretty` | Human-readable JSON |
 | `--json <path>` | Write raw JSON to a file |
-| `--max-depth N` | Stop after depth N (0–4)—`2` keeps it entirely free |
+| `--max-depth N` | Stop after depth N (0–4). `--max-depth 2` keeps it entirely free |
 | `--deep` | Add SixtyFour (depth 5). Expensive, rate-limited, opt-in |
-| `--tier low\|medium\|high` | SixtyFour depth (default `low`) |
+| `--tier low\|medium\|high` | SixtyFour research depth (default `low`) |
 | `--no-bio` | Skip the Tabstack `/research` bio |
 | `--bio-mode fast\|balanced\|deep\|max` | Bio research depth (default `fast`) |
 
@@ -107,22 +132,24 @@ node scripts/dev-trace.mjs someone@example.com --deep
     "generated_at": "<ISO-8601>"
   },
   "profile": {
-    "name":     { "value": "...", "confidence": 0.9,  "sources": ["hunter"], "conflict": null },
-    "role":     { "value": "...", "confidence": 0.9,  "sources": ["hunter"], "conflict": null },
-    "bio":      { "value": "...", "confidence": 0.85, "sources": ["tabstack-research"], "conflict": null }
+    "<field>": { "value": "...", "confidence": 0.0, "sources": ["..."], "conflict": null }
   }
 }
 ```
 
 - `match_status`: `verified` (confirmed + deliverable), `probable` (found, unconfirmed), `unverified_candidates` (below threshold).
-- A layer that errors or is rate-limited is recorded in `meta.errors` / `meta.rate_limited`; the waterfall never aborts on one layer.
+- Failed or rate-limited layers are recorded in `meta.errors` / `meta.rate_limited`.
 
 ## Principles
 
 - **Public data only.** No invented profiles. Below the confidence threshold, candidates are returned, not asserted.
-- **Deterministic.** Fixed layer order and flags; output varies only with live source data and which keys are present, and `meta.depths_run` always explains what ran.
+- **Deterministic.** Fixed layer order and flags; output varies only with live source data and which keys are present. `meta.depths_run` always explains what ran.
 - **Transparent cost.** Free by default; paid layers are opt-in and labeled.
+
+## Contributing
+
+Issues and PRs welcome. Keep the engine dependency-free (Node built-ins only) and every new layer key-gated and cost-labeled.
 
 ---
 
-MIT © Built for Devs. Providers (Hunter, Tabstack, SixtyFour, GitHub) are independent services—bring your own keys and accounts.
+MIT © [Built for Devs](https://builtfor.dev). Hunter, Tabstack, SixtyFour, and GitHub are independent services—bring your own keys and accounts.
