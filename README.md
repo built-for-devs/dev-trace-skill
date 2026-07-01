@@ -126,6 +126,13 @@ git clone https://github.com/built-for-devs/dev-trace-skill ~/.claude/skills/dev
 
 For Claude Code that's `~/.claude/skills/` (global) or a project's `.claude/skills/`. The agent reads `SKILL.md` and invokes the engine for you. Not using a skills-aware agent? Run the engine directly, as in [Quickstart](#quickstart).
 
+Or install it through the Claude Code plugin marketplace:
+
+```bash
+/plugin marketplace add built-for-devs/dev-trace-skill
+/plugin install dev-trace@built-for-devs
+```
+
 ## Using with other agents
 
 The engine is a plain Node CLI, so any agent or script that can run a shell command can use Dev Trace—Codex, Cursor, Gemini CLI, OpenClaw, or your own automation.

@@ -1,0 +1,11 @@
+{
+  "name": "dev-trace",
+  "displayName": "Dev Trace",
+  "version": "1.0.0",
+  "description": "Turn an email into an enriched, cited public profile via a deterministic free-to-premium enrichment waterfall (GitHub, Tabstack, Hunter, SixtyFour).",
+  "author": { "name": "Built for Devs" },
+  "homepage": "https://github.com/built-for-devs/dev-trace-skill",
+  "repository": "https://github.com/built-for-devs/dev-trace-skill",
+  "license": "MIT",
+  "keywords": ["email-enrichment", "lead-enrichment", "people-intelligence", "prospecting", "osint", "developer-tools", "agent-skill"]
+}

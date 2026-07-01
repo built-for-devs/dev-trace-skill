@@ -1,0 +1,14 @@
+{
+  "name": "built-for-devs",
+  "owner": { "name": "Built for Devs" },
+  "description": "Skills and tools from Built for Devs.",
+  "plugins": [
+    {
+      "name": "dev-trace",
+      "source": { "source": "github", "repo": "built-for-devs/dev-trace-skill" },
+      "description": "Turn an email into an enriched, cited public profile via a deterministic enrichment waterfall.",
+      "author": { "name": "Built for Devs" },
+      "license": "MIT"
+    }
+  ]
+}
