@@ -61,11 +61,11 @@ Every field carries its own `confidence`, the `sources` that produced it, and a 
 
 What you get back depends on which layers run, but the waterfall can fill a wide profile:
 
-- **Identity** — `name`, `role`, `seniority`, `location`, `avatar`, `bio`
-- **Company** — `company_name`, `company_description`, `company_industry`, `company_size`, `company_location`, `company_domain`
-- **Social** — `social_linkedin`, `social_twitter`, `social_github`, any Gravatar-linked accounts, plus `company_social_*`
-- **Contact** — `email_found`, `phone`, `website`
-- **GitHub** — `github_login`, `github_public_repos`, `github_followers`
+- **Identity**—`name`, `role`, `seniority`, `location`, `avatar`, `bio`
+- **Company**—`company_name`, `company_description`, `company_industry`, `company_size`, `company_location`, `company_domain`
+- **Social**—`social_linkedin`, `social_twitter`, `social_github`, any Gravatar-linked accounts, plus `company_social_*`
+- **Contact**—`email_found`, `phone`, `website`
+- **GitHub**—`github_login`, `github_public_repos`, `github_followers`
 
 Fields only appear when a source actually returns them (public data only), and each is wrapped with `value` / `confidence` / `sources` / `conflict`.
 
@@ -125,6 +125,16 @@ git clone https://github.com/built-for-devs/dev-trace-skill ~/.claude/skills/dev
 ```
 
 For Claude Code that's `~/.claude/skills/` (global) or a project's `.claude/skills/`. The agent reads `SKILL.md` and invokes the engine for you. Not using a skills-aware agent? Run the engine directly, as in [Quickstart](#quickstart).
+
+## Using with other agents
+
+The engine is a plain Node CLI, so any agent or script that can run a shell command can use Dev Trace—Codex, Cursor, Gemini CLI, OpenClaw, or your own automation.
+
+- **Claude Code** reads [`SKILL.md`](./SKILL.md).
+- **Codex** and any [AGENTS.md](https://agents.md)-aware tool read [`AGENTS.md`](./AGENTS.md).
+- **Gemini CLI / Cursor / others**: run the engine directly, or copy the usage and cost policy from `AGENTS.md` into your `GEMINI.md` or Cursor rules.
+
+Both instruction files describe the same engine and the same cost policy, so behavior is identical no matter which agent drives it.
 
 ## Usage
 
