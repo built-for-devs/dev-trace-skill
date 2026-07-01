@@ -30,6 +30,8 @@ Policy: default to the free + cheap layers. `--max-depth 2` stays entirely free.
 
 **SixtyFour (`--deep`) is expensive and rate-limited** (~$4.80 per `medium` pull, ~5/month on the entry plan). Never run `--deep` to "be thorough"—only on a genuinely high-value target, only after cheaper layers came up short, and **confirm with the user before spending a pull**. Default `--tier low`; don't raise the tier or `--bio-mode` unprompted.
 
+**Enforced for autonomous use:** `--deep` will not run unless a human accepted the cost, via `DEV_TRACE_ALLOW_DEEP=1` in the environment or an interactive confirmation. Without that, passing `--deep` is skipped and logged in `meta.errors`, with zero SixtyFour spend. Set `DEV_TRACE_MAX_DEPTH=N` to cap the default depth for a headless agent (the `--max-depth` flag still overrides per call). Keys are read from the environment, so no `.env` file is needed in a container.
+
 ## Output
 
 One JSON object: `meta` (email, `depths_run`, `match_status`, timestamps) plus `profile`, where every field is wrapped with `value`, `confidence` (0–1), `sources`, and `conflict`. See the README for the full field list.

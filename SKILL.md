@@ -66,6 +66,7 @@ Policy: default to free + cheap layers. For a quick free lookup, `--max-depth 2`
 - Never run `--deep` to "be thorough." Only on a genuinely high-value target.
 - Only after the cheaper layers (Hunter person enrichment, the `/research` bio) have come up short.
 - **Confirm with the user before spending a SixtyFour pull**, and default `--tier low`—never raise the tier unprompted.
+- **Enforced, not just advised:** `--deep` refuses to run unless a human accepted the cost, via `DEV_TRACE_ALLOW_DEEP=1` in the environment or an interactive confirmation. It cannot fire autonomously. `DEV_TRACE_MAX_DEPTH=N` caps depth for headless use. See the README "Headless / autonomous agents" section.
 
 `--bio-mode` above `fast` and depths 3/4 spend ordinary credits—fine when relevant, but don't raise `--bio-mode` unprompted.
 

@@ -18,6 +18,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { resolveMx } from 'node:dns/promises';
+import { createInterface } from 'node:readline';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 
@@ -53,7 +54,12 @@ const flag = (f) => args.includes(f);
 const flagVal = (f) => (args.indexOf(f) !== -1 ? args[args.indexOf(f) + 1] : undefined);
 const PRETTY = flag('--pretty');
 const OUT = flagVal('--json');
-const MAX_DEPTH = flagVal('--max-depth') !== undefined ? Number(flagVal('--max-depth')) : 4;
+const MAX_DEPTH =
+  flagVal('--max-depth') !== undefined
+    ? Number(flagVal('--max-depth'))
+    : process.env.DEV_TRACE_MAX_DEPTH !== undefined
+      ? Number(process.env.DEV_TRACE_MAX_DEPTH)
+      : 4;
 const DEEP = flag('--deep');
 const TIER = flagVal('--tier') || 'low';
 const NO_BIO = flag('--no-bio');
@@ -372,8 +378,33 @@ async function depth4() {
 }
 
 // ---- depth 5: deep (SixtyFour people-intelligence, async; needs --deep + key + identity anchor) ----
+// SixtyFour (depth 5) is expensive and rate-limited, so it never runs without explicit
+// acceptance: a standing DEV_TRACE_ALLOW_DEEP env opt-in, or an interactive confirmation.
+async function deepAllowed() {
+  if (/^(1|true|yes|on)$/i.test(process.env.DEV_TRACE_ALLOW_DEEP || '')) return true;
+  if (process.stdin.isTTY && process.stderr.isTTY) {
+    return await new Promise((resolve) => {
+      const rl = createInterface({ input: process.stdin, output: process.stderr });
+      rl.question(
+        'SixtyFour deep enrichment costs ~$4.80/pull and is rate-limited (~5/month). Proceed? [y/N] ',
+        (a) => {
+          rl.close();
+          resolve(/^y(es)?$/i.test(a.trim()));
+        },
+      );
+    });
+  }
+  return false;
+}
+
 async function depth5() {
   if (!SIXTYFOUR || !DEEP) return;
+  if (!(await deepAllowed())) {
+    meta.errors.push(
+      'sixtyfour: skipped, deep enrichment needs acceptance (set DEV_TRACE_ALLOW_DEEP=1 or confirm interactively)',
+    );
+    return;
+  }
   if (meta.validation?.disposable || meta.validation?.mx === false) {
     meta.errors.push('sixtyfour: skipped, email is disposable or has no MX');
     return;

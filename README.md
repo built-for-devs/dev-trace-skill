@@ -143,6 +143,16 @@ The engine is a plain Node CLI, so any agent or script that can run a shell comm
 
 Both instruction files describe the same engine and the same cost policy, so behavior is identical no matter which agent drives it.
 
+## Headless / autonomous agents
+
+Dev Trace runs cleanly in any headless context (cloud agents, CI, cron) with no code changes:
+
+- **Keys come from the environment**—set `HUNTER_API_KEY`, `TABSTACK_API_KEY`, etc. however your platform injects secrets. No `.env` file required.
+- **Non-interactive**—no prompts; JSON to stdout, failed layers captured in `meta` so a run never crashes the task.
+- **SixtyFour cannot spend without acceptance**—the expensive `--deep` layer refuses to run unless a human has accepted the cost: `DEV_TRACE_ALLOW_DEEP=1` in the environment (standing acceptance set by the operator) or an interactive confirmation. An autonomous agent that passes `--deep` without that opt-in gets a skipped layer logged in `meta.errors` and zero SixtyFour spend.
+- **`DEV_TRACE_MAX_DEPTH=N`** caps the default depth (the `--max-depth` flag still overrides per call), e.g. `DEV_TRACE_MAX_DEPTH=2` keeps an agent on the free layers.
+- **Runtime:** needs Node 18+ available in your container/runtime.
+
 ## Usage
 
 ```bash
